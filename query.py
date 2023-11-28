@@ -31,6 +31,10 @@ class UserByPostFeignRequest(BaseModel):
     postSeq: int
     userSeq: int
 
+class UserByReplyFeignRequest(BaseModel):
+    replySeq: int
+    userSeq: int
+
 #썸네일 & 프로필 이미지 리스트 반환
 @app.post("/receive_thumbnail_and_profile")
 async def receive_thumbnail_and_profile(requests: List[UserByPostFeignRequest]):
@@ -64,6 +68,22 @@ async def receive_thumbnail(request: UserByPostFeignRequest):
     result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
 
     return JSONResponse(content=result_object)
+
+#댓글 프로필 이미지 리스트 반환
+@app.post("/receive_profile")
+async def receive_profile(requests: List[UserByReplyFeignRequest]):
+    result_list = []
+    for request in requests:
+
+        reply_seq = request.replySeq
+        user_seq = request.userSeq
+        user = db.user.find_one({"userSeq":user_seq})
+
+        profileImg = user.get("imageUrl","")
+        result_object={"replySeq":reply_seq, "userSeq":user_seq, "profileImg":profileImg}
+        result_list.append(result_object)
+
+    return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)
