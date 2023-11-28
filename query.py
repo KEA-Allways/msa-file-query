@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi  import HTTPException
-from fastapi import FastAPI, Form 
+from fastapi import FastAPI, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
@@ -23,28 +23,31 @@ MONGO_DB_URL=os.getenv("MONGO_DB_URL")
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
 
+DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+
+DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
 class UserByPostFeignRequest(BaseModel):
     postSeq: int
     userSeq: int
-    
+
 #썸네일 & 프로필 이미지 리스트 반환
 @app.post("/receive_thumbnail_and_profile")
 async def receive_thumbnail_and_profile(requests: List[UserByPostFeignRequest]):
     # MongoDB에서 해당 postSeq 값을 가진 문서 조회
     result_list = []
     for request in requests:
-        
+
         post_seq = request.postSeq
         user_seq = request.userSeq
         thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
         user = db.user.find_one({"userSeq":user_seq})
-        
+
         thumbImg = thumbnail.get("imageUrl","")
         profileImg = user.get("imageUrl","")
         result_object={"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
         result_list.append(result_object)
-    #10개의 리스트 반환 
+    #10개의 리스트 반환
     return JSONResponse(content=result_list)
 
 #썸네일 & 프로필 이미지 반환
@@ -56,11 +59,11 @@ async def receive_thumbnail(request: UserByPostFeignRequest):
     thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
     user = db.user.find_one({"userSeq":user_seq})
 
-    thumbImg = thumbnail.get("imageUrl") if thumbnail else ""
-    profileImg = user.get("imageUrl") if user else ""
+    thumbImg = thumbnail.get("imageUrl") if thumbnail else DEFAULT_THUMBNAIL
+    profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
     result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
 
     return JSONResponse(content=result_object)
-                                                                                                                             
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)
