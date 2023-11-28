@@ -28,25 +28,39 @@ class UserByPostFeignRequest(BaseModel):
     postSeq: int
     userSeq: int
     
-#썸네일 반환 
+#썸네일 & 프로필 이미지 리스트 반환
 @app.post("/receive_thumbnail_and_profile")
 async def receive_thumbnail_and_profile(requests: List[UserByPostFeignRequest]):
     # MongoDB에서 해당 postSeq 값을 가진 문서 조회
     result_list = []
-    for request  in requests:
+    for request in requests:
         
-        post_seq= request.postSeq
+        post_seq = request.postSeq
         user_seq = request.userSeq
         thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
         user = db.user.find_one({"userSeq":user_seq})
         
         thumbImg = thumbnail.get("imageUrl","")
-        profileImg=user.get("imageUrl","")
+        profileImg = user.get("imageUrl","")
         result_object={"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
         result_list.append(result_object)
     #10개의 리스트 반환 
     return JSONResponse(content=result_list)
 
+#썸네일 & 프로필 이미지 반환
+@app.post("/receive_thumbnail")
+async def receive_thumbnail(request: UserByPostFeignRequest):
+
+    post_seq = request.postSeq
+    user_seq = request.userSeq
+    thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
+    user = db.user.find_one({"userSeq":user_seq})
+
+    thumbImg = thumbnail.get("imageUrl") if thumbnail else ""
+    profileImg = user.get("imageUrl") if user else ""
+    result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
+
+    return JSONResponse(content=result_object)
                                                                                                                              
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)
