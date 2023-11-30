@@ -1,10 +1,8 @@
-FROM python:3.10
+FROM python:3.11
 
-COPY ./src /src
+COPY . /src
 WORKDIR /src
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade requirements.txt
 
-EXPOSE 80
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "main:app", "--host", "3.86.230.148", "--port", "8088"]

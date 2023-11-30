@@ -7,20 +7,22 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
 
-env_path = r'C:\Users\suha hwang\Desktop\projectPackage\FastAPI-BOOK\kaloTest\venv\.env'
+env_path = r'.env'
 load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
 
-#MONGO_DB_URL=os.getenv("MONGO_DB_URL")
-MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+MONGO_DB_URL=os.getenv("MONGO_DB_URL")
 
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
 
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
+
+eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+                   app_name="file-query-service",
+                   instance_port=8081)
 
 class UserByPostFeignRequest(BaseModel):
     postSeq: int

@@ -4,26 +4,25 @@ pipeline {
 
 
     environment {
-        
-        
+
         //서버 정보
-        ip = "54.147.162.65"
+        ip = "3.86.230.148"
         username = "ubuntu"
         
-        //스프링 서버 정보
-        springname = "blog-query"
-        port = "8086"
+        //서버 정보
+        servername = "file-query"
+        port = "8088"
         
         //도커 정보
-        imagename = "blog-query-img"
+        imagename = "file-query-img"
         dockerCredential = 'docker-access-token'
         dockerImage = ''
         tagname = "dev"
         
         //깃 정보
-        giturl = 'https://github.com/KEA-Allways/msa-blog-query.git/'
+        giturl = 'https://github.com/KEA-Allways/msa-file-query.git/'
         gitCredential = "github-access-token"
-        branchname = "prod"
+        branchname = "dev"
     }
 
     stages {
@@ -45,23 +44,29 @@ pipeline {
           }
         }
 
-        // gradle build
-        stage('Bulid Gradle') {
-          steps {
-            echo 'Bulid Gradle'
-            dir ('.'){
-                sh """
-                ./gradlew clean build --exclude-task test
-                """
+
+         stage('Create env file') {
+            steps {
+                dir(".") {
+
+                    sh '''
+                        touch .env
+                        echo 'MONGO_DB_URL=mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/' >> .env
+                        echo 'REST_API_KEY=5a2a4e45ffeb910b796bec78b8641b9e' >> .env
+                        echo 'AWS_REGION=us-east-1' >> .env
+                        echo 'S3_BUCKET_NAME=unv-gcu-allways-bucket' >> .env
+                        echo 'AWS_ACCESS_KEY_ID=AKIAZFEQRMP3SU6GZS4V' >> .env
+                        echo 'AWS_SECRET_ACCESS_KEY=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' >> .env
+                    '''
+                }
             }
-          }
-          post {
+
+            post {
             failure {
               error 'This pipeline stops here...'
             }
           }
-        }
-        
+
         // docker build
         stage('Bulid Docker') {
           steps {
@@ -104,12 +109,12 @@ pipeline {
 
                 sh 'ssh -o StrictHostKeyChecking=no ${username}@${ip} "whoami"'
 
-                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker ps -f name=${springname} -q | xargs --no-run-if-empty docker container stop'"
-                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker container ls -a -fname=${springname} -q | xargs --no-run-if-empty docker container rm'"
+                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker ps -f name=${servername} -q | xargs --no-run-if-empty docker container stop'"
+                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker container ls -a -fname=${servername} -q | xargs --no-run-if-empty docker container rm'"
                 sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker images -f reference=${imagename}:${tagname} -q | xargs --no-run-if-empty docker image rmi'"
 
                 sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker pull ${imagename}:${tagname}'"
-                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker run -d -p 81:${port} -p ${port}:${port} --name ${springname} ${imagename}:${tagname}'"
+                sh "ssh -o StrictHostKeyChecking=no ${username}@${ip} 'docker run -d -p 80:${port} -p ${port}:${port} --name ${servername} ${imagename}:${tagname}'"
             }
           }
 
