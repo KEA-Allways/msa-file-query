@@ -18,7 +18,8 @@ load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
 
-MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+#MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
 
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
@@ -35,9 +36,25 @@ class UserByReplyFeignRequest(BaseModel):
     replySeq: int
     userSeq: int
 
+#썸네일 & 프로필 이미지 반환
+@app.post("/api/feign/post")
+async def queryImageUrlByPost(request: UserByPostFeignRequest):
+
+    post_seq = request.postSeq
+    user_seq = request.userSeq
+    thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
+    user = db.user.find_one({"userSeq":user_seq})
+
+    thumbImg = thumbnail.get("imageUrl") if thumbnail else DEFAULT_THUMBNAIL
+    profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
+    result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
+
+    return JSONResponse(content=result_object)
+
+
 #썸네일 & 프로필 이미지 리스트 반환
-@app.post("/receive_thumbnail_and_profile")
-async def receive_thumbnail_and_profile(requests: List[UserByPostFeignRequest]):
+@app.post("/api/feign/post/list")
+async def queryImageUrlListByPost(requests: List[UserByPostFeignRequest]):
     # MongoDB에서 해당 postSeq 값을 가진 문서 조회
     result_list = []
     for request in requests:
@@ -54,24 +71,10 @@ async def receive_thumbnail_and_profile(requests: List[UserByPostFeignRequest]):
     #10개의 리스트 반환
     return JSONResponse(content=result_list)
 
-#썸네일 & 프로필 이미지 반환
-@app.post("/receive_thumbnail")
-async def receive_thumbnail(request: UserByPostFeignRequest):
-
-    post_seq = request.postSeq
-    user_seq = request.userSeq
-    thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
-    user = db.user.find_one({"userSeq":user_seq})
-
-    thumbImg = thumbnail.get("imageUrl") if thumbnail else DEFAULT_THUMBNAIL
-    profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
-    result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
-
-    return JSONResponse(content=result_object)
 
 #댓글 프로필 이미지 리스트 반환
-@app.post("/receive_profile")
-async def receive_profile(requests: List[UserByReplyFeignRequest]):
+@app.post("/api/feign/reply/list")
+async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     result_list = []
     for request in requests:
 
