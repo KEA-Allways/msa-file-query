@@ -6,12 +6,12 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
+import py_eureka_client.eureka_client as eureka_client
 
 env_path = r'.env'
 load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
-
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
 
 mongo_client=MongoClient(MONGO_DB_URL)
@@ -20,9 +20,11 @@ db = mongo_client.file
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
-eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+eureka_client.init(eureka_server="http://54.87.40.18",
                    app_name="file-query-service",
-                   instance_port=8081)
+                   instance_port=8088,
+                   instance_host="3.86.230.148"
+                   )
 
 class UserByPostFeignRequest(BaseModel):
     postSeq: int
@@ -85,4 +87,4 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="3.86.230.148", port=8088)
