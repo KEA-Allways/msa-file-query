@@ -1,14 +1,8 @@
 import uvicorn
-from fastapi  import HTTPException
 from fastapi import FastAPI, Form
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-from typing import Optional
-from io import BytesIO
 from typing import List
 from pydantic import BaseModel
-from pydantic import ValidationError
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
