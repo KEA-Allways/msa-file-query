@@ -3,6 +3,6 @@ FROM python:3.11
 COPY . /src
 WORKDIR /src
 
-RUN pip install --no-cache-dir --upgrade requirements.txt
+RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--host", "3.86.230.148", "--port", "8088"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088"]

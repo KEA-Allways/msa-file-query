@@ -20,11 +20,7 @@ db = mongo_client.file
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
-eureka_client.init(eureka_server="http://54.87.40.18",
-                   app_name="file-query-service",
-                   instance_port=8088,
-                   instance_host="3.86.230.148"
-                   )
+    
 
 class UserByPostFeignRequest(BaseModel):
     postSeq: int
@@ -87,4 +83,10 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="3.86.230.148", port=8088)
+    uvicorn.run(app, host="0.0.0.0", port=8088)
+
+    eureka_client.init(eureka_server="http://54.87.40.18",
+                    app_name="file-query-service",
+                    instance_port=8088,
+                    instance_host="3.86.230.148"
+                    )
