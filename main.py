@@ -88,5 +88,5 @@ if __name__ == "__main__":
     eureka_client.init(eureka_server="http://54.87.40.18",
                     app_name="file-query-service",
                     instance_port=8088,
-                    instance_host="3.86.230.148"
+                    instance_host="127.0.0.1"
                     )
