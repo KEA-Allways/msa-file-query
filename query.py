@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
 
-env_path = r'C:\Users\suha hwang\Desktop\projectPackage\FastAPI-BOOK\kaloTest\venv\.env'
-load_dotenv(dotenv_path=env_path)
+env_path = r'main의 env 경로'
+load_dotenv()
 
 app = FastAPI()
 
@@ -50,6 +50,19 @@ class UserByReplyFeignRequest(BaseModel):
 class ThemeImgByThemeSeq(BaseModel):
     themeSeq : int
 
+# 프로필 이미지 반환
+@app.get("/receive_profile/{userSeq}")
+async def queryProfileImg(userSeq : int):
+
+    user_seq = userSeq
+    user = db.user.find_one({"userSeq:":user_seq})
+
+    profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
+    result_object = {"userSeq":user_seq,"profileImg":profileImg}
+
+    return JSONResponse(content=result_object)
+
+# 테마 이미지 반환
 @app.get("/api/file/theme/{themeSeq}")
 async def queryThemeImg(themeSeq : int ):
 
