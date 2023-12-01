@@ -52,15 +52,26 @@ class ThemeImgByThemeSeq(BaseModel):
 
 # 프로필 이미지 반환
 @app.get("/receive_profile/{userSeq}")
-async def queryProfileImg(userSeq : int):
-
-    user_seq = userSeq
-    user = db.user.find_one({"userSeq:":user_seq})
-
-    profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
-    result_object = {"userSeq":user_seq,"profileImg":profileImg}
-
-    return JSONResponse(content=result_object)
+async def receive_profile(userSeq: int):
+    # Your logic to fetch the profile image based on userSeq
+    user = db.user.find_one({"userSeq": userSeq})
+    if user is not None:
+        profileImg = user.get("imageUrl", "")
+        return {"profileImg": profileImg}
+    else:
+        # If user is not found, raise an HTTPException with a 404 status code
+        raise HTTPException(status_code=404, detail="User not found")
+    
+# @app.post("/receive_profile/{userSeq}")
+# async def receive_profile(userSeq: int):
+#     # Your logic to fetch the profile image based on userSeq
+#     user = db.user.find_one({"userSeq": userSeq})
+#     if user is not None:
+#         profileImg = user.get("imageUrl", "")
+#         return {"profileImg": profileImg}
+#     else:
+#         # If user is not found, raise an HTTPException with a 404 status code
+#         raise HTTPException(status_code=404, detail="User not found")
 
 # 테마 이미지 반환
 @app.get("/api/file/theme/{themeSeq}")
