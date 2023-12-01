@@ -1,20 +1,14 @@
 import uvicorn
-from fastapi  import HTTPException
 from fastapi import FastAPI, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
-from typing import Optional
-from io import BytesIO
 from typing import List
 from pydantic import BaseModel
-from pydantic import ValidationError
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
+# import py_eureka_client.eureka_client as eureka_client
 
-env_path = r'main의 env 경로'
-load_dotenv()
 
 app = FastAPI()
 
@@ -27,8 +21,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#MONGO_DB_URL=os.getenv("MONGO_DB_URL")
-MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+
+# MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+env_path = r'.env'
+load_dotenv(dotenv_path=env_path)
+MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+
+print(MONGO_DB_URL)
+
 
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
@@ -36,8 +36,9 @@ db = mongo_client.file
 DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
 
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
+
+    
 
 class UserByPostFeignRequest(BaseModel):
     postSeq: int
@@ -129,4 +130,11 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8088)
+
+    # eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+    #                 app_name="file-query-service",
+    #                 instance_port=8088,
+    #                 instance_ip="3.86.230.148"
+    #                 )
+    
