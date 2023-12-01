@@ -1,22 +1,38 @@
 import uvicorn
 from fastapi import FastAPI, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
-import py_eureka_client.eureka_client as eureka_client
+# import py_eureka_client.eureka_client as eureka_client
 
-env_path = r'.env'
-load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
+
+#cors설정 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # 리액트 앱의 주소
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+env_path = r'.env'
+load_dotenv(dotenv_path=env_path)
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+
+
 
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
 
+DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
@@ -29,6 +45,35 @@ class UserByPostFeignRequest(BaseModel):
 class UserByReplyFeignRequest(BaseModel):
     replySeq: int
     userSeq: int
+
+class ThemeImgByThemeSeq(BaseModel):
+    themeSeq : int
+
+# 프로필 이미지 반환
+@app.get("/api/file/profileImg/{userSeq}")
+async def queryProfileImg(userSeq: int):
+    # Your logic to fetch the profile image based on userSeq
+    user = db.user.find_one({"userSeq": userSeq})
+    if user is not None:
+        profileImg = user.get("imageUrl", "")
+        return {"profileImg": profileImg}
+    else:
+        # If user is not found, raise an HTTPException with a 404 status code
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+# 테마 이미지 반환
+@app.get("/api/file/theme/{themeSeq}")
+async def queryThemeImg(themeSeq : int ):
+
+    theme_seq = themeSeq
+    theme = db.theme.find_one({"themeSeq":theme_seq})
+
+    themeImg = theme.get("imageUrl") if theme else DEFAULT_THEME_IMG
+    result_object = {"themeSeq":theme_seq,"themeImg":themeImg}
+
+    return JSONResponse(content=result_object)
+    
 
 #썸네일 & 프로필 이미지 반환
 @app.post("/api/feign/post")
@@ -85,8 +130,9 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8088)
 
-    eureka_client.init(eureka_server="http://54.87.40.18",
-                    app_name="file-query-service",
-                    instance_port=8088,
-                    instance_host="127.0.0.1"
-                    )
+    # eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+    #                 app_name="file-query-service",
+    #                 instance_port=8088,
+    #                 instance_ip="3.86.230.148"
+    #                 )
+    
