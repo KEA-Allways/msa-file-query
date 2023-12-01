@@ -18,11 +18,22 @@ load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
 
+#cors설정 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # 리액트 앱의 주소
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 #MONGO_DB_URL=os.getenv("MONGO_DB_URL")
 MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
 
 mongo_client=MongoClient(MONGO_DB_URL)
 db = mongo_client.file
+
+DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
 
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 
@@ -35,6 +46,21 @@ class UserByPostFeignRequest(BaseModel):
 class UserByReplyFeignRequest(BaseModel):
     replySeq: int
     userSeq: int
+
+class ThemeImgByThemeSeq(BaseModel):
+    themeSeq : int
+
+@app.get("/api/file/theme/{themeSeq}")
+async def queryThemeImg(themeSeq : int ):
+
+    theme_seq = themeSeq
+    theme = db.theme.find_one({"themeSeq":theme_seq})
+
+    themeImg = theme.get("imageUrl") if theme else DEFAULT_THEME_IMG
+    result_object = {"themeSeq":theme_seq,"themeImg":themeImg}
+
+    return JSONResponse(content=result_object)
+    
 
 #썸네일 & 프로필 이미지 반환
 @app.post("/api/feign/post")
