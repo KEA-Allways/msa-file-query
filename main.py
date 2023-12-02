@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
-# import py_eureka_client.eureka_client as eureka_client
+import py_eureka_client.eureka_client as eureka_client
 
 
 app = FastAPI()
@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 
-# MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+
 env_path = r'.env'
 load_dotenv(dotenv_path=env_path)
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
@@ -130,9 +130,17 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8088)
 
-    # eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+    #local
+    eureka_client.init(eureka_server="http://localhost:8761",
+                    app_name="file-query-service",
+                    instance_port=8088,
+                    instance_ip="0.0.0.0"
+                    )
+
+    #dev
+    # eureka_client.init(eureka_server="http://54.237.219.35:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
-    #                 instance_ip="3.86.230.148"
+    #                 instance_ip="0.0.0.0"
     #                 )
     
