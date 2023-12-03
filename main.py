@@ -8,33 +8,39 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
 from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
-# import py_eureka_client.eureka_client as eureka_client
+import py_eureka_client.eureka_client as eureka_client
 
 
 app = FastAPI()
 
+env_path = r'.env'
+load_dotenv(dotenv_path=env_path)
+
 #cors설정 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # 리액트 앱의 주소
+    # allow_origins=["http://localhost:3000"],  # local 리액트 앱의 주소
+    allow_origins=["http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com"],  # dev 리액트 앱의 주소
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+APM_SECRET_TOKEN=os.getenv("APM_SECRET_TOKEN")
+APM_SERVER_URL=os.getenv("APM_SECRET_TOKEN")
+
 apm = make_apm_client({
     'ENVIRONMENT' : 'msa-allways',
     'SERVICE_NAME': 'msa-file-query',
-    'SECRET_TOKEN': ' ',
-    'SERVER_URL': ' ',  # Elastic APM 서버의 URL
+    'SECRET_TOKEN': APM_SECRET_TOKEN,
+    'SERVER_URL': APM_SERVER_URL
 })
+
 app.add_middleware(ElasticAPM, client=apm)
 
-# MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
-env_path = r'C:\Users\suha hwang\Desktop\projectPackage\FastAPI-BOOK\kaloTest\venv\.env'
 
-load_dotenv(dotenv_path=env_path)
+
 MONGO_DB_QUERY_URL=os.getenv("MONGO_DB_QUERY_URL")
 
 if MONGO_DB_QUERY_URL is None:
@@ -142,11 +148,19 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8088)
-
-    # eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
+     #local
+    # eureka_client.init(eureka_server="http://localhost:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
-    #                 instance_ip="3.86.230.148"
+    #                 instance_ip="127.0.0.1"
     #                 )
+    
+    #dev 
+    eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
+                    app_name="file-query-service",
+                    instance_port=8088,
+                    instance_ip="54.147.162.65"
+                    )
+    
+    uvicorn.run(app, host="0.0.0.0", port=8088)
     
