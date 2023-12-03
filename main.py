@@ -26,8 +26,8 @@ app.add_middleware(
 apm = make_apm_client({
     'ENVIRONMENT' : 'msa-allways',
     'SERVICE_NAME': 'msa-file-query',
-    'SECRET_TOKEN': 'hyUExzAkUlugz8LsPW',
-    'SERVER_URL': 'https://f694429f0917434384e0abfab751507d.apm.us-west-2.aws.cloud.es.io:443',  # Elastic APM 서버의 URL
+    'SECRET_TOKEN': ' ',
+    'SERVER_URL': ' ',  # Elastic APM 서버의 URL
 })
 app.add_middleware(ElasticAPM, client=apm)
 
