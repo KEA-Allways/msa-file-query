@@ -128,17 +128,21 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8088)
 
-    #local
-    eureka_client.init(eureka_server="http://localhost:8761",
+     #local
+    eureka_client.init(eureka_server="http://localhost:8761/eureka",
                     app_name="file-query-service",
                     instance_port=8088,
-                    instance_ip="0.0.0.0"
+                    instance_ip="127.0.0.1"
                     )
+    
+    
+    uvicorn.run(app, host="0.0.0.0", port=8088)
+
+   
 
     #dev
-    # eureka_client.init(eureka_server="http://54.237.219.35:8761/eureka",
+    # eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
     #                 instance_ip="0.0.0.0"
