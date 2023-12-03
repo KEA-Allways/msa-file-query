@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
-# from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
+from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
 import py_eureka_client.eureka_client as eureka_client
 
 
@@ -28,16 +28,19 @@ app.add_middleware(
 
 
 APM_SECRET_TOKEN=os.getenv("APM_SECRET_TOKEN")
-APM_SERVER_URL=os.getenv("APM_SECRET_TOKEN")
+APM_SERVER_URL=os.getenv("APM_SERVER_URL")
 
-# apm = make_apm_client({
-#     'ENVIRONMENT' : 'msa-allways',
-#     'SERVICE_NAME': 'msa-file-query',
-#     'SECRET_TOKEN': APM_SECRET_TOKEN,
-#     'SERVER_URL': APM_SERVER_URL
-# })
+print(APM_SECRET_TOKEN)
+print(APM_SERVER_URL)
 
-# app.add_middleware(ElasticAPM, client=apm)
+apm = make_apm_client({
+    'ENVIRONMENT' : 'msa-allways',
+    'SERVICE_NAME': 'msa-file-query',
+    'SECRET_TOKEN': APM_SECRET_TOKEN,
+    'SERVER_URL': APM_SERVER_URL
+})
+
+app.add_middleware(ElasticAPM, client=apm)
 
 
 
@@ -149,7 +152,7 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
 
 if __name__ == "__main__":
 
-    #local
+    # local
     # eureka_client.init(eureka_server="http://localhost:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
