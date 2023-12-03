@@ -7,8 +7,6 @@ charset-normalizer==3.3.0
 click==8.1.7
 colorama==0.4.6
 dnspython==2.4.2
-ecs-logging==2.1.0
-elastic-apm==6.19.0
 fastapi==0.103.2
 h11==0.14.0
 idna==3.4
@@ -30,4 +28,3 @@ starlette==0.27.0
 typing_extensions==4.8.0
 urllib3==1.26.0
 uvicorn==0.23.2
-wrapt==1.14.1
