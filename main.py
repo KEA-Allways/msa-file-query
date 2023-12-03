@@ -7,7 +7,8 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import os
-import py_eureka_client.eureka_client as eureka_client
+from elasticapm.contrib.starlette import make_apm_client, ElasticAPM
+# import py_eureka_client.eureka_client as eureka_client
 
 
 app = FastAPI()
@@ -22,17 +23,28 @@ app.add_middleware(
 )
 
 
+apm = make_apm_client({
+    'ENVIRONMENT' : 'msa-allways',
+    'SERVICE_NAME': 'msa-file-query',
+    'SECRET_TOKEN': 'hyUExzAkUlugz8LsPW',
+    'SERVER_URL': 'https://f694429f0917434384e0abfab751507d.apm.us-west-2.aws.cloud.es.io:443',  # Elastic APM 서버의 URL
+})
+app.add_middleware(ElasticAPM, client=apm)
 
-env_path = r'.env'
+# MONGO_DB_URL = "mongodb://root:0707@172.16.210.121:27017/?authMechanism=DEFAULT/"
+env_path = r'C:\Users\suha hwang\Desktop\projectPackage\FastAPI-BOOK\kaloTest\venv\.env'
+
 load_dotenv(dotenv_path=env_path)
-MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+MONGO_DB_QUERY_URL=os.getenv("MONGO_DB_QUERY_URL")
 
+if MONGO_DB_QUERY_URL is None:
+    raise ValueError("MONGO_DB_URL is not set in the environment variables.")
 
-
-mongo_client=MongoClient(MONGO_DB_URL)
+mongo_client=MongoClient(MONGO_DB_QUERY_URL)
 db = mongo_client.file
 
 DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
+
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
@@ -84,6 +96,8 @@ async def queryImageUrlByPost(request: UserByPostFeignRequest):
     thumbnail = db.thumbnail.find_one({"postSeq":post_seq})
     user = db.user.find_one({"userSeq":user_seq})
 
+   
+
     thumbImg = thumbnail.get("imageUrl") if thumbnail else DEFAULT_THUMBNAIL
     profileImg = user.get("imageUrl") if user else DEFAULT_PROFILE_IMG
     result_object = {"postSeq":post_seq,"userSeq":user_seq,"thumbImg":thumbImg,"profileImg":profileImg}
@@ -128,23 +142,11 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
     return JSONResponse(content=result_list)
 
 if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8088)
 
-     #local
-    eureka_client.init(eureka_server="http://localhost:8761/eureka",
-                    app_name="file-query-service",
-                    instance_port=8088,
-                    instance_ip="127.0.0.1"
-                    )
-    
-    
-    uvicorn.run(app, host="0.0.0.0", port=8088)
-
-   
-
-    #dev
-    # eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
+    # eureka_client.init(eureka_server="http://54.87.40.18:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
-    #                 instance_ip="0.0.0.0"
+    #                 instance_ip="3.86.230.148"
     #                 )
     
