@@ -19,9 +19,13 @@ load_dotenv()
 #cors설정 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # local 리액트 앱의 주소
+    allow_origins=[
+        "http://localhost:3000",  # local 리액트 앱의 주소
+        "http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com",  # dev 리액트 앱의 주소
+    ],
+    # allow_origins=["http://localhost:3000"],  # local 리액트 앱의 주소
     ### cloud front로 변경
-    #allow_origins=["http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com"],  # dev 리액트 앱의 주소
+    # allow_origins=["http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com"],  # dev 리액트 앱의 주소
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -161,7 +165,8 @@ if __name__ == "__main__":
     eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
                     app_name="file-query-service",
                     instance_port=8088,
-                    instance_ip="3.86.230.148"
+                    instance_ip="3.86.230.148",
+                    instance_host="3.86.230.148"
                     )
     
 
