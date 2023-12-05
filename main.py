@@ -14,13 +14,14 @@ import py_eureka_client.eureka_client as eureka_client
 app = FastAPI()
 
 env_path = r'.env'
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 #cors설정 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"],  # local 리액트 앱의 주소
-    allow_origins=["http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com"],  # dev 리액트 앱의 주소
+    allow_origins=["http://localhost:3000"],  # local 리액트 앱의 주소
+    ### cloud front로 변경
+    #allow_origins=["http://gcu-kea-001-front.s3-website.ap-northeast-2.amazonaws.com"],  # dev 리액트 앱의 주소
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,9 +30,9 @@ app.add_middleware(
 
 APM_SECRET_TOKEN=os.getenv("APM_SECRET_TOKEN")
 APM_SERVER_URL=os.getenv("APM_SERVER_URL")
+MONGO_DB_QUERY_URL=os.getenv("MONGO_DB_QUERY_URL")
 
-print(APM_SECRET_TOKEN)
-print(APM_SERVER_URL)
+
 
 apm = make_apm_client({
     'ENVIRONMENT' : 'msa-allways',
@@ -44,7 +45,6 @@ app.add_middleware(ElasticAPM, client=apm)
 
 
 
-MONGO_DB_QUERY_URL=os.getenv("MONGO_DB_QUERY_URL")
 
 if MONGO_DB_QUERY_URL is None:
     raise ValueError("MONGO_DB_URL is not set in the environment variables.")
@@ -53,7 +53,6 @@ mongo_client=MongoClient(MONGO_DB_QUERY_URL)
 db = mongo_client.file
 
 DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
-
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 DEFAULT_THUMBNAIL = "https://allways-test-bucket.s3.ap-northeast-2.amazonaws.com/logo.png"
 
