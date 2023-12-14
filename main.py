@@ -1,4 +1,5 @@
 import uvicorn
+from fastapi  import HTTPException
 from fastapi import FastAPI, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -54,7 +55,7 @@ if MONGO_DB_QUERY_URL is None:
     raise ValueError("MONGO_DB_URL is not set in the environment variables.")
 
 mongo_client=MongoClient(MONGO_DB_QUERY_URL)
-db = mongo_client.file
+db = mongo_client.Sungjun
 
 DEFAULT_THEME_IMG = "https://suhabuckettest.s3.ap-northeast-2.amazonaws.com/b038817e-8db9-11ee-aee7-1413338a0c50_image.jpg"
 DEFAULT_PROFILE_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
@@ -156,19 +157,18 @@ async def queryImageUrlListByReply(requests: List[UserByReplyFeignRequest]):
 if __name__ == "__main__":
 
     # local
-    eureka_client.init(eureka_server="http://localhost:8761/eureka",
-                    app_name="file-query-service",
-                    instance_port=8088,
-                    instance_ip="0.0.0.0",
-                    instance_host="0.0.0.0"
-                    )
-
-    # eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
+    # eureka_client.init(eureka_server="http://localhost:8761/eureka",
     #                 app_name="file-query-service",
     #                 instance_port=8088,
-    #                 instance_ip="3.86.230.148",
-    #                 instance_host="3.86.230.148"
+    #                 instance_ip="0.0.0.0"
     #                 )
+
+    eureka_client.init(eureka_server="http://3.213.139.105:8761/eureka",
+                    app_name="file-query-service",
+                    instance_port=8088,
+                    instance_ip="3.86.230.148",
+                    instance_host="3.86.230.148"
+                    )
     
 
     uvicorn.run(app, host="0.0.0.0", port=8088)
